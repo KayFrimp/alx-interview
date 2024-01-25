@@ -10,9 +10,13 @@ def minOperations(n):
     dp = [float('inf')] * (n + 1)
     dp[1] = 0
 
-    for i in range(2, n + 1):
-        for j in range(1, i):
-            if i % j == 0:
-                dp[i] = min(dp[i], dp[j] + i // j)
+    operations = 0
+    divisor = 2
 
-    return dp[n] if dp[n] != float('inf') else 0
+    while n > 1:
+        while n % divisor == 0:
+            operations += divisor
+            n //= divisor
+        divisor += 1
+
+    return operations
