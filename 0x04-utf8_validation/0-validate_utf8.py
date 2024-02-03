@@ -8,18 +8,20 @@ def validUTF8(data):
     i = 0
 
     while i < len(data):
-        leading_bits = bin(data[i])[2:].zfill(8)[:4]
-        if leading_bits == '1110':
+        if not (0 <= data[i] <= 255):
+            return False
+        leading_bits = bin(data[i])[2:].zfill(8)[:3]
+        if leading_bits == '110':
+            if i + 1 >= len(data) or bin(data[i + 1])[2:3] != '10':
+                return False
+            i += 2
+        elif leading_bits == '1110':
             if i + 2 >= len(data) or any(bin(byte)[2:3] != '10'
                                          for byte in data[i + 1:i + 3]):
                 return False
             i += 3
-        elif leading_bits == '110':
-            if i + 1 >= len(data) or bin(data[i + 1])[2:3] != '10':
-                return False
-            i += 2
         elif leading_bits == '10':
-            return False
+            return False  # Unexpected leading byte
         else:
             i += 1
     return True
