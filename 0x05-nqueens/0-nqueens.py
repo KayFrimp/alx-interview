@@ -2,6 +2,15 @@
 import sys
 
 
+def print_board(board):
+    """ print_board
+    Args:
+        board - list of list with length sys.argv[1]
+    """
+    board = [[0 for _ in range(n)] for _ in range(n)]
+    print(board)
+
+
 def is_safe(board, row, col):
     """Checks for any safe movements on board"""
     # Check this row on left side
@@ -22,30 +31,27 @@ def is_safe(board, row, col):
     return True
 
 
-def solve_nq(board, col):
+def solve_nq(board, col, col_number):
     """Checks if the queen can be placed in any row in the column col
     return: boolean"""
-    # Base case: If all queens are placed
-    if col >= len(board):
+    if (col == col_number):
+        print_board(board)
         return True
+    possible = False
+    for i in range(col_number):
 
-    # Consider this column and try placing this queen in all rows one by one
-    for i in range(len(board)):
-        if is_safe(board, i, col):
+        if (is_safe(board, i, col, col_number)):
+
             # Place this queen in board[i][col]
             board[i][col] = 1
 
-            # Recur to place rest of the queens
-            if solve_nq(board, col + 1):
-                return True
+            # Make result true if any placement
+            # is possible
+            possible = solve_nq(board, col + 1, col_number) or possible
 
-            # If placing queen in board[i][col] doesn't lead to a solution
-            # then remove queen from board[i][col]
-            board[i][col] = 0
+            board[i][col] = 0  # BACKTRACK
 
-    # If the queen can not be placed in any row in this column col
-    # then return false
-    return False
+    return possible
 
 
 def solve_n_queens(n):
@@ -54,20 +60,34 @@ def solve_n_queens(n):
     solutions."""
     board = [[0 for _ in range(n)] for _ in range(n)]
 
-    if not solve_nq(board,  0):
-        return "Solution does not exist"
+    if not solve_nq(board,  0, n):
+        return False
 
-    for row in board:
-        print(row)
+    return True
+
+
+def validate(args):
+    """ Validate the input data to verify if the size to
+        answer is posible
+    Args:
+        args - sys.argv
+    """
+    if (len(args) == 2):
+        # Validate data
+        try:
+            number = int(args[1])
+        except Exception:
+            print("N must be a number")
+            exit(1)
+        if number < 4:
+            print("N must be at least 4")
+            exit(1)
+        return number
+    else:
+        print("Usage: nqueens N")
+        exit(1)
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2 or not sys.argv[1].isdigit()\
-            or int(sys.argv[1]) < 4:
-        print("Usage: nqueens N")
-        sys.exit(1)
-
-    N = int(sys.argv[1])
-    result = solve_n_queens(N)
-    if type(result) is str:
-        print(result)
+    N = validate(sys.argv)
+    solve_n_queens(N)
