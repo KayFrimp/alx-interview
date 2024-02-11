@@ -7,8 +7,16 @@ def print_board(board):
     Args:
         board - list of list with length sys.argv[1]
     """
-    board = [[0 for _ in range(n)] for _ in range(n)]
-    print(board)
+    new_list = []
+    for i, row in enumerate(board):
+        value = []
+        for j, col in enumerate(row):
+            if col == 1:
+                value.append(i)
+                value.append(j)
+        new_list.append(value)
+
+    print(new_list)
 
 
 def is_safe(board, row, col):
