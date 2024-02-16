@@ -1,32 +1,25 @@
 #!/usr/bin/node
 const request = require('request');
-const url = 'https://swapi-api.alx-tools.com/api/';
+const API_URL = 'https://swapi-api.alx-tools.com/api';
 
-// Function to fetch and display character names
-function fetchAndPrintCharacters(movieId) {
-  const filmUrl = `${url}films/${movieId}/`;
-
-  // Request to get film details
-  request({ url: filmUrl, json: true }, (error, response, body) => {
-    if (!error && response.statusCode ===  200) {
-      const charactersUrls = body.characters;
-      
-      // For each character URL, request character details
-      charactersUrls.forEach((characterUrl, index) => {
-        request({ url: characterUrl, json: true }, (err, res, charBody) => {
-          if (!err && res.statusCode ===  200) {
-            console.log(charBody.name);
-          }
-        });
-      });
+if (process.argv.length > 2) {
+  request(`${API_URL}/films/${process.argv[2]}/`, (err, _, body) => {
+    if (err) {
+      console.log(err);
     }
-  });
-}
+    const charactersURL = JSON.parse(body).characters;
+    const charactersName = charactersURL.map(
+      url => new Promise((resolve, reject) => {
+        request(url, (promiseErr, __, charactersReqBody) => {
+          if (promiseErr) {
+            reject(promiseErr);
+          }
+          resolve(JSON.parse(charactersReqBody).name);
+        });
+      }));
 
-// Check if a movie ID was provided
-if (process.argv[2]) {
-  const movieId = process.argv[2];
-  fetchAndPrintCharacters(movieId);
-} else {
-  console.log('Please provide a movie ID.');
+    Promise.all(charactersName)
+      .then(names => console.log(names.join('\n')))
+      .catch(allErr => console.log(allErr));
+  });
 }
